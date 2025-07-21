@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const grid = document.createElement('div');
         grid.className = 'kmap-grid';
-        // CRITICAL CHANGE FOR RESPONSIVENESS: Use '1fr' instead of fixed pixels
         grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
         for (let r = 0; r < rows; r++) {
@@ -61,9 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const addLabels = (rowLabels, colLabels) => {
         let sideVarName, topVarName;
 
-        if (numVars === 2) { sideVarName = 'A'; topVarName = 'B'; } 
+        if (numVars === 2) { sideVarName = 'C'; topVarName = 'D'; } // Note: Using C,D for consistency, maps to A,B in output
         else if (numVars === 3) { sideVarName = 'A'; topVarName = 'BC'; }
-        else { sideVarName = 'AB'; topVarName = 'CD'; }
+        else { 
+            // MODIFIED: Swapped variable labels
+            sideVarName = 'CD'; 
+            topVarName = 'AB'; 
+        }
 
         const rowBitLabelContainer = document.createElement('div');
         rowBitLabelContainer.className = 'labels row-bit-labels';
@@ -183,14 +186,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const getBinaryRepresentation = (cell) => {
         const rowMap = ['00', '01', '11', '10'], colMap = ['00', '01', '11', '10'];
-        if(numVars === 2) return rowMap[cell.r].slice(1) + colMap[cell.c].slice(1);
+        if(numVars === 2) return colMap[cell.c].slice(1) + rowMap[cell.r].slice(1);
         if(numVars === 3) return rowMap[cell.r].slice(1) + colMap[cell.c];
-        return rowMap[cell.r] + colMap[cell.c];
+        // MODIFIED: Swapped concatenation order to match new axes (AB from columns, CD from rows)
+        return colMap[cell.c] + rowMap[cell.r];
     };
 
     const termToExpression = (group) => {
         const binaryReps = group.minterms.map(getBinaryRepresentation);
-        const vars = ['A', 'B', 'C', 'D'].slice(0, numVars);
+        const vars = numVars === 2 ? ['A', 'B'] : ['A', 'B', 'C', 'D'].slice(0, numVars);
         let expression = '';
 
         for (let i = 0; i < numVars; i++) {
@@ -204,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getTermExplanation = (group, groupIndex) => {
         const binaryReps = group.minterms.map(getBinaryRepresentation);
-        const vars = ['A', 'B', 'C', 'D'].slice(0, numVars);
+        const vars = numVars === 2 ? ['A', 'B'] : ['A', 'B', 'C', 'D'].slice(0, numVars);
         let explanation = `<p><b>Group ${groupIndex + 1} (${groupColors[groupIndex % groupColors.length]}):</b><br/>`;
         
         for (let i = 0; i < numVars; i++) {

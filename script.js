@@ -1,4 +1,55 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Step 3: Authentication Logic ---
+    const authModal = document.getElementById('auth-modal');
+    const appContent = document.getElementById('app-content');
+    
+    const loginFormContainer = document.getElementById('login-form-container');
+    const registerFormContainer = document.getElementById('register-form-container');
+    
+    const showRegisterLink = document.getElementById('show-register');
+    const showLoginLink = document.getElementById('show-login');
+
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+
+    // Function to show the main application
+    const showApp = () => {
+        authModal.classList.add('hidden');
+        appContent.classList.remove('hidden');
+    };
+
+    // Event listeners for switching between login and register forms
+    showRegisterLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginFormContainer.classList.add('hidden');
+        registerFormContainer.classList.remove('hidden');
+    });
+
+    showLoginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        registerFormContainer.classList.add('hidden');
+        loginFormContainer.classList.remove('hidden');
+    });
+
+    // Handle login form submission
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // In a real app, you'd send data to a server here
+        console.log('Simulating login...');
+        showApp();
+    });
+
+    // Handle register form submission
+    registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // In a real app, you'd send data to a server here
+        console.log('Simulating registration...');
+        showApp();
+    });
+
+
+    // --- K-Map Solver Logic (existing code) ---
     const variableSelect = document.getElementById('variable-select');
     const solveButton = document.getElementById('solve-button');
     const resetButton = document.getElementById('reset-button');
@@ -60,10 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const addLabels = (rowLabels, colLabels) => {
         let sideVarName, topVarName;
 
-        if (numVars === 2) { sideVarName = 'C'; topVarName = 'D'; } // Note: Using C,D for consistency, maps to A,B in output
+        if (numVars === 2) { sideVarName = 'C'; topVarName = 'D'; }
         else if (numVars === 3) { sideVarName = 'A'; topVarName = 'BC'; }
         else { 
-            // MODIFIED: Swapped variable labels
             sideVarName = 'CD'; 
             topVarName = 'AB'; 
         }
@@ -188,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const rowMap = ['00', '01', '11', '10'], colMap = ['00', '01', '11', '10'];
         if(numVars === 2) return colMap[cell.c].slice(1) + rowMap[cell.r].slice(1);
         if(numVars === 3) return rowMap[cell.r].slice(1) + colMap[cell.c];
-        // MODIFIED: Swapped concatenation order to match new axes (AB from columns, CD from rows)
         return colMap[cell.c] + rowMap[cell.r];
     };
 
@@ -231,5 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
     solveButton.addEventListener('click', solveKMap);
     resetButton.addEventListener('click', createKMap);
 
-    createKMap(); // Initial setup
+    // Initial K-Map setup call
+    createKMap(); 
 });

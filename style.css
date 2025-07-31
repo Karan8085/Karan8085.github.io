@@ -189,7 +189,7 @@ button:hover {
     padding-bottom: 0;
 }
 
-/* NEW: Group Border Styling */
+/* Group Border Styling */
 .border-container {
     position: absolute;
     display: flex;
@@ -204,7 +204,24 @@ button:hover {
     flex: 1;
 }
 
-/* Color definitions for border segments */
+/* NEW: Group Dot Styling */
+.dot-container {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    display: flex;
+    flex-wrap: wrap;
+    pointer-events: none;
+}
+.group-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin: 1px;
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
+/* Color definitions for borders and dots */
 .group-color-0 { background-color: #ffc107; } /* Yellow/Orange */
 .group-color-1 { background-color: #28a745; } /* Green */
 .group-color-2 { background-color: #dc3545; } /* Red */
@@ -252,5 +269,9 @@ footer p {
     }
     h1 {
         font-size: 1.8rem;
+    }
+    .group-dot {
+      width: 6px;
+      height: 6px;
     }
 }

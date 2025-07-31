@@ -105,7 +105,7 @@ button:hover {
     cursor: pointer;
     user-select: none;
     transition: background-color 0.2s;
-    position: relative; /* Crucial for positioning dots */
+    position: relative; /* Crucial for positioning the borders */
 }
 
 .kmap-cell:hover {
@@ -114,7 +114,7 @@ button:hover {
 
 /* K-Map Labels */
 .labels {
-    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+    font-size: clamp(0.7rem, 2.5vw, 0.9rem); /* Responsive font size */
     font-weight: bold;
     color: #333;
     position: absolute;
@@ -140,7 +140,7 @@ button:hover {
 }
 
 .col-bit-labels div, .row-bit-labels div {
-    flex: 1;
+    flex: 1; /* Distribute space evenly to align with grid cells */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -171,7 +171,7 @@ button:hover {
 
 #solution {
     font-family: 'Courier New', Courier, monospace;
-    font-size: clamp(1rem, 4vw, 1.25rem);
+    font-size: clamp(1rem, 4vw, 1.25rem); /* Responsive font size */
     font-weight: bold;
     color: #d63384;
     margin: 0;
@@ -189,7 +189,22 @@ button:hover {
     padding-bottom: 0;
 }
 
-/* Group Dot Styling */
+/* Group Border Styling */
+.border-container {
+    position: absolute;
+    display: flex;
+    pointer-events: none; /* Make sure they don't interfere with clicks */
+}
+.border-top { top: -2px; left: -2px; right: -2px; height: 4px; flex-direction: row; }
+.border-bottom { bottom: -2px; left: -2px; right: -2px; height: 4px; flex-direction: row; }
+.border-left { left: -2px; top: -2px; bottom: -2px; width: 4px; flex-direction: column; }
+.border-right { right: -2px; top: -2px; bottom: -2px; width: 4px; flex-direction: column; }
+
+.border-segment {
+    flex: 1;
+}
+
+/* NEW: Group Dot Styling */
 .dot-container {
     position: absolute;
     top: 2px;
@@ -206,7 +221,7 @@ button:hover {
     border: 1px solid rgba(0,0,0,0.2);
 }
 
-/* Color definitions for dots */
+/* Color definitions for borders and dots */
 .group-color-0 { background-color: #ffc107; } /* Yellow/Orange */
 .group-color-1 { background-color: #28a745; } /* Green */
 .group-color-2 { background-color: #dc3545; } /* Red */

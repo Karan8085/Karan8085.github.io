@@ -105,6 +105,7 @@ button:hover {
     cursor: pointer;
     user-select: none;
     transition: background-color 0.2s;
+    position: relative; /* Crucial for positioning the borders */
 }
 
 .kmap-cell:hover {
@@ -188,13 +189,31 @@ button:hover {
     padding-bottom: 0;
 }
 
-/* Group Highlighting */
-.group-highlight-0 { background-color: rgba(255, 165, 0, 0.4); } /* Orange */
-.group-highlight-1 { background-color: rgba(50, 205, 50, 0.4);  }  /* Green */
-.group-highlight-2 { background-color: rgba(255, 20, 147, 0.4); } /* Pink */
-.group-highlight-3 { background-color: rgba(138, 43, 226, 0.4); } /* Purple */
-.group-highlight-4 { background-color: rgba(0, 191, 255, 0.4); }  /* Blue */
-.group-highlight-5 { background-color: rgba(255, 215, 0, 0.4); }  /* Gold */
+/* NEW: Group Border Styling */
+.border-container {
+    position: absolute;
+    display: flex;
+    pointer-events: none; /* Make sure they don't interfere with clicks */
+}
+.border-top { top: -2px; left: -2px; right: -2px; height: 4px; flex-direction: row; }
+.border-bottom { bottom: -2px; left: -2px; right: -2px; height: 4px; flex-direction: row; }
+.border-left { left: -2px; top: -2px; bottom: -2px; width: 4px; flex-direction: column; }
+.border-right { right: -2px; top: -2px; bottom: -2px; width: 4px; flex-direction: column; }
+
+.border-segment {
+    flex: 1;
+}
+
+/* Color definitions for border segments */
+.group-color-0 { background-color: #ffc107; } /* Yellow/Orange */
+.group-color-1 { background-color: #28a745; } /* Green */
+.group-color-2 { background-color: #dc3545; } /* Red */
+.group-color-3 { background-color: #6f42c1; } /* Purple */
+.group-color-4 { background-color: #007bff; } /* Blue */
+.group-color-5 { background-color: #fd7e14; } /* Orange */
+.group-color-6 { background-color: #17a2b8; } /* Teal */
+.group-color-7 { background-color: #e83e8c; } /* Pink */
+
 
 /* Footer */
 footer {

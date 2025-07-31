@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let numVars = 4;
     let cells = [];
-    const groupColors = ['Orange', 'Green', 'Pink', 'Purple', 'Blue', 'Gold'];
+    const groupColors = ['Yellow/Orange', 'Green', 'Red', 'Purple', 'Blue', 'Orange', 'Teal', 'Pink'];
 
     const createKMap = () => {
         kmapWrapper.innerHTML = '';
@@ -43,10 +43,27 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let c = 0; c < cols; c++) {
                 const cell = document.createElement('div');
                 cell.className = 'kmap-cell';
-                cell.textContent = '0';
+                
+                // Create the text node for '0', '1', 'X'
+                const cellText = document.createElement('span');
+                cellText.textContent = '0';
+                cell.appendChild(cellText);
+                
                 cell.addEventListener('click', () => {
-                    cell.textContent = cell.textContent === '0' ? '1' : (cell.textContent === '1' ? 'X' : '0');
+                    cellText.textContent = cellText.textContent === '0' ? '1' : (cellText.textContent === '1' ? 'X' : '0');
                 });
+                
+                // MODIFIED: Add border containers to each cell
+                const borderTop = document.createElement('div');
+                borderTop.className = 'border-container border-top';
+                const borderRight = document.createElement('div');
+                borderRight.className = 'border-container border-right';
+                const borderBottom = document.createElement('div');
+                borderBottom.className = 'border-container border-bottom';
+                const borderLeft = document.createElement('div');
+                borderLeft.className = 'border-container border-left';
+                cell.append(borderTop, borderRight, borderBottom, borderLeft);
+
                 grid.appendChild(cell);
                 rowArr.push(cell);
             }
@@ -60,12 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const addLabels = (rowLabels, colLabels) => {
         let sideVarName, topVarName;
 
-        if (numVars === 2) { sideVarName = 'C'; topVarName = 'D'; } // Note: Using C,D for consistency, maps to A,B in output
+        if (numVars === 2) { sideVarName = 'A'; topVarName = 'B'; } 
         else if (numVars === 3) { sideVarName = 'A'; topVarName = 'BC'; }
-        else { 
-            // MODIFIED: Swapped variable labels
-            sideVarName = 'CD'; 
-            topVarName = 'AB'; 
+        else {  
+            sideVarName = 'AB'; 
+            topVarName = 'CD';
         }
 
         const rowBitLabelContainer = document.createElement('div');
@@ -93,18 +109,26 @@ document.addEventListener('DOMContentLoaded', () => {
         kmapWrapper.append(rowBitLabelContainer, colBitLabelContainer, sideVars, topVars);
     };
 
+    // NEW: Function to clear all borders before solving
+    const clearAllBorders = () => {
+        for (const row of cells) {
+            for (const cell of row) {
+                cell.querySelectorAll('.border-container').forEach(container => {
+                    container.innerHTML = '';
+                });
+            }
+        }
+    };
+    
     const solveKMap = () => {
+        clearAllBorders();
         const rows = cells.length, cols = cells[0].length;
         const minterms = [];
         explanationContainer.innerHTML = '<h2>Explanation of Terms:</h2>';
 
-        cells.flat().forEach(cell => {
-            cell.classList.remove(...Array.from(cell.classList).filter(cl => cl.startsWith('group-highlight')));
-        });
-        
         for(let r = 0; r < rows; r++) {
             for(let c = 0; c < cols; c++) {
-                if (cells[r][c].textContent !== '0') {
+                if (cells[r][c].querySelector('span').textContent !== '0') {
                     minterms.push({r, c});
                 }
             }
@@ -123,12 +147,59 @@ document.addEventListener('DOMContentLoaded', () => {
             explanationContainer.innerHTML = '';
         }
 
+        // MODIFIED: Call the new border drawing function
+        drawGroupBorders(essentialTerms);
+
         essentialTerms.forEach((group, i) => {
             const explanation = getTermExplanation(group, i);
             explanationContainer.innerHTML += explanation;
-            
-            group.minterms.forEach(mt => {
-                cells[mt.r][mt.c].classList.add(`group-highlight-${i % groupColors.length}`);
+        });
+    };
+
+    // NEW: Function to draw the borders for all groups
+    const drawGroupBorders = (groups) => {
+        const rows = cells.length;
+        const cols = cells[0].length;
+
+        groups.forEach((group, groupIndex) => {
+            const groupMintermSet = new Set(group.minterms.map(mt => `${mt.r},${mt.c}`));
+            const colorClass = `group-color-${groupIndex % groupColors.length}`;
+
+            group.minterms.forEach(minterm => {
+                const { r, c } = minterm;
+                const cell = cells[r][c];
+
+                // Check Top Border
+                const topNeighbor = `${(r - 1 + rows) % rows},${c}`;
+                if (!groupMintermSet.has(topNeighbor)) {
+                    const segment = document.createElement('div');
+                    segment.className = `border-segment ${colorClass}`;
+                    cell.querySelector('.border-top').appendChild(segment);
+                }
+
+                // Check Bottom Border
+                const bottomNeighbor = `${(r + 1) % rows},${c}`;
+                if (!groupMintermSet.has(bottomNeighbor)) {
+                    const segment = document.createElement('div');
+                    segment.className = `border-segment ${colorClass}`;
+                    cell.querySelector('.border-bottom').appendChild(segment);
+                }
+
+                // Check Left Border
+                const leftNeighbor = `${r},${(c - 1 + cols) % cols}`;
+                if (!groupMintermSet.has(leftNeighbor)) {
+                    const segment = document.createElement('div');
+                    segment.className = `border-segment ${colorClass}`;
+                    cell.querySelector('.border-left').appendChild(segment);
+                }
+
+                // Check Right Border
+                const rightNeighbor = `${r},${(c + 1) % cols}`;
+                if (!groupMintermSet.has(rightNeighbor)) {
+                    const segment = document.createElement('div');
+                    segment.className = `border-segment ${colorClass}`;
+                    cell.querySelector('.border-right').appendChild(segment);
+                }
             });
         });
     };
@@ -186,21 +257,31 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const getBinaryRepresentation = (cell) => {
         const rowMap = ['00', '01', '11', '10'], colMap = ['00', '01', '11', '10'];
-        if(numVars === 2) return colMap[cell.c].slice(1) + rowMap[cell.r].slice(1);
+        if(numVars === 2) return rowMap[cell.r].slice(1) + colMap[cell.c].slice(1);
         if(numVars === 3) return rowMap[cell.r].slice(1) + colMap[cell.c];
-        // MODIFIED: Swapped concatenation order to match new axes (AB from columns, CD from rows)
-        return colMap[cell.c] + rowMap[cell.r];
+        return rowMap[cell.r] + colMap[cell.c];
     };
 
     const termToExpression = (group) => {
         const binaryReps = group.minterms.map(getBinaryRepresentation);
-        const vars = numVars === 2 ? ['A', 'B'] : ['A', 'B', 'C', 'D'].slice(0, numVars);
+        let vars;
+        // Adjust variable names based on numVars and label conventions
+        if (numVars === 2) vars = ['A', 'B'];
+        else if (numVars === 3) vars = ['A', 'B', 'C'];
+        else vars = ['A', 'B', 'C', 'D'];
+
         let expression = '';
 
+        // Remap binary positions to correct variables for 4-var case (AB on side, CD on top)
+        const varMap = (numVars === 4) ? [0, 1, 2, 3] : (numVars === 3 ? [0, 1, 2] : [0, 1]);
+        const mappedVars = (numVars === 4) ? ['A', 'B', 'C', 'D'] : (numVars === 3 ? ['A', 'B', 'C'] : ['A', 'B']);
+
+
         for (let i = 0; i < numVars; i++) {
-            const firstBit = binaryReps[0][i];
-            if (binaryReps.every(br => br[i] === firstBit)) {
-                expression += vars[i] + (firstBit === '0' ? "'" : "");
+            const bitIndex = varMap[i];
+            const firstBit = binaryReps[0][bitIndex];
+            if (binaryReps.every(br => br[bitIndex] === firstBit)) {
+                expression += mappedVars[i] + (firstBit === '0' ? "'" : "");
             }
         }
         return expression || '1';
@@ -208,7 +289,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getTermExplanation = (group, groupIndex) => {
         const binaryReps = group.minterms.map(getBinaryRepresentation);
-        const vars = numVars === 2 ? ['A', 'B'] : ['A', 'B', 'C', 'D'].slice(0, numVars);
+         let vars;
+        if (numVars === 2) vars = ['A', 'B'];
+        else if (numVars === 3) vars = ['A', 'B', 'C'];
+        else vars = ['A', 'B', 'C', 'D'];
         let explanation = `<p><b>Group ${groupIndex + 1} (${groupColors[groupIndex % groupColors.length]}):</b><br/>`;
         
         for (let i = 0; i < numVars; i++) {

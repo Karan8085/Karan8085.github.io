@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cell = document.createElement('div');
                 cell.className = 'kmap-cell';
                 
+                // Create the text node for '0', '1', 'X'
                 const cellText = document.createElement('span');
                 cellText.textContent = '0';
                 cell.appendChild(cellText);
@@ -52,10 +53,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     cellText.textContent = cellText.textContent === '0' ? '1' : (cellText.textContent === '1' ? 'X' : '0');
                 });
                 
-                // Add dot container
+                // Add border containers
+                const borderTop = document.createElement('div');
+                borderTop.className = 'border-container border-top';
+                const borderRight = document.createElement('div');
+                borderRight.className = 'border-container border-right';
+                const borderBottom = document.createElement('div');
+                borderBottom.className = 'border-container border-bottom';
+                const borderLeft = document.createElement('div');
+                borderLeft.className = 'border-container border-left';
+
+                // NEW: Add dot container
                 const dotContainer = document.createElement('div');
                 dotContainer.className = 'dot-container';
-                cell.append(dotContainer);
+
+                cell.append(borderTop, borderRight, borderBottom, borderLeft, dotContainer);
 
                 grid.appendChild(cell);
                 rowArr.push(cell);
@@ -102,11 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
         kmapWrapper.append(rowBitLabelContainer, colBitLabelContainer, sideVars, topVars);
     };
 
-    // Function to clear all visualizations (dots)
+    // MODIFIED: Function to clear all visualizations (borders and dots)
     const clearVisualization = () => {
         for (const row of cells) {
             for (const cell of row) {
-                cell.querySelector('.dot-container').innerHTML = '';
+                cell.querySelectorAll('.border-container, .dot-container').forEach(container => {
+                    container.innerHTML = '';
+                });
             }
         }
     };
@@ -138,7 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
             explanationContainer.innerHTML = '';
         }
 
-        // Call the drawing function for dots
+        // Call both drawing functions for the hybrid visualization
+        drawGroupBorders(essentialTerms);
         drawGroupDots(essentialTerms);
 
         essentialTerms.forEach((group, i) => {
@@ -147,7 +162,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Function to draw the dots for all groups
+    const drawGroupBorders = (groups) => {
+        const rows = cells.length;
+        const cols = cells[0].length;
+
+        groups.forEach((group, groupIndex) => {
+            const groupMintermSet = new Set(group.minterms.map(mt => `${mt.r},${mt.c}`));
+            const colorClass = `group-color-${groupIndex % groupColors.length}`;
+
+            group.minterms.forEach(minterm => {
+                const { r, c } = minterm;
+                const cell = cells[r][c];
+
+                const topNeighbor = `${(r - 1 + rows) % rows},${c}`;
+                if (!groupMintermSet.has(topNeighbor)) {
+                    const segment = document.createElement('div');
+                    segment.className = `border-segment ${colorClass}`;
+                    cell.querySelector('.border-top').appendChild(segment);
+                }
+
+                const bottomNeighbor = `${(r + 1) % rows},${c}`;
+                if (!groupMintermSet.has(bottomNeighbor)) {
+                    const segment = document.createElement('div');
+                    segment.className = `border-segment ${colorClass}`;
+                    cell.querySelector('.border-bottom').appendChild(segment);
+                }
+
+                const leftNeighbor = `${r},${(c - 1 + cols) % cols}`;
+                if (!groupMintermSet.has(leftNeighbor)) {
+                    const segment = document.createElement('div');
+                    segment.className = `border-segment ${colorClass}`;
+                    cell.querySelector('.border-left').appendChild(segment);
+                }
+
+                const rightNeighbor = `${r},${(c + 1) % cols}`;
+                if (!groupMintermSet.has(rightNeighbor)) {
+                    const segment = document.createElement('div');
+                    segment.className = `border-segment ${colorClass}`;
+                    cell.querySelector('.border-right').appendChild(segment);
+                }
+            });
+        });
+    };
+
+    // NEW: Function to draw the dots for all groups
     const drawGroupDots = (groups) => {
         groups.forEach((group, groupIndex) => {
             const colorClass = `group-color-${groupIndex % groupColors.length}`;
